@@ -19,6 +19,31 @@
                 placeholder="Например DOGE"
               />
             </div>
+            <div
+              class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap"
+            >
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                BTC
+              </span>
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                DOGE
+              </span>
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                BCH
+              </span>
+              <span
+                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+              >
+                CHD
+              </span>
+            </div>
+            <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
           </div>
         </div>
         <button
@@ -139,13 +164,29 @@ export default {
     return {
       ticker: "",
       tickers: [],
+      ticker_api: [],
       sel: null,
       graph: []
     };
   },
 
+  created: function() {
+    setTimeout(async () => {
+      const f = await fetch(
+        "https://min-api.cryptocompare.com/data/all/coinlist?summary=true"
+      );
+      const data = await f.json();
+      for (let key in data.Data) {
+        this.ticker_api.push(key);
+      }
+
+      console.log(this.ticker_api[4]);
+    }, 0);
+  },
+
   methods: {
     add() {
+      this.ticker = this.ticker.toUpperCase();
       const currentTicker = {
         name: this.ticker,
         price: "-"
@@ -156,6 +197,7 @@ export default {
           `https://min-api.cryptocompare.com/data/price?fsym=${currentTicker.name}&tsyms=USD&api_key={ea7e75098ea735e40bd69af85850b8fd18db85eb1a4c3868235349800a84e729}`
         );
         const data = await f.json();
+        console.log(data);
 
         this.tickers.find(t => t.name === currentTicker.name).price =
           data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2);
