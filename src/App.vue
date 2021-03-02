@@ -6,12 +6,12 @@
         <div class="flex">
           <div class="max-w-xs">
             <label for="wallet" class="block text-sm font-medium text-gray-700"
-              >Тикер</label
-            >
+              >Тикер
+            </label>
             <div class="mt-1 relative rounded-md shadow-md">
               <input
                 v-model="ticker"
-                @keydown.enter="add"
+                @keydown.enter="add()"
                 type="text"
                 name="wallet"
                 id="wallet"
@@ -23,31 +23,22 @@
               class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap"
             >
               <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
+                v-for="(t, idx) in choise_tik()"
+                :key="idx"
+                @click="add(t)"
+                class="inline-flex items-center px-2 m-1 rounded-md
+                text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
               >
-                BTC
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                DOGE
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BCH
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                CHD
+                {{ t }}
               </span>
             </div>
-            <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
+            <div v-if="stroka === true" class="text-sm text-red-600">
+              Такой тикер уже добавлен
+            </div>
           </div>
         </div>
         <button
-          @click="add"
+          @click="add()"
           type="button"
           class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
         >
@@ -166,7 +157,10 @@ export default {
       tickers: [],
       ticker_api: [],
       sel: null,
-      graph: []
+      graph: [],
+      ch_tik: [],
+      now_add: [],
+      stroka: false
     };
   },
 
@@ -179,18 +173,25 @@ export default {
       for (let key in data.Data) {
         this.ticker_api.push(key);
       }
-
-      console.log(this.ticker_api[4]);
     }, 0);
   },
 
   methods: {
-    add() {
+    add(tfs = this.ticker) {
+      this.ticker = tfs;
       this.ticker = this.ticker.toUpperCase();
       const currentTicker = {
         name: this.ticker,
         price: "-"
       };
+      for (let i = 0; i < this.tickers.length; i++) {
+        if (this.ticker === this.tickers[i].name) {
+          this.stroka = true;
+          return false;
+        }
+      }
+      this.stroka = false;
+      console.log(this.tickers);
       this.tickers.push(currentTicker);
       setInterval(async () => {
         const f = await fetch(
@@ -224,6 +225,24 @@ export default {
     select(ticker) {
       this.sel = ticker;
       this.graph = [];
+    },
+
+    choise_tik() {
+      let mass = [];
+      if (this.ticker != "") {
+        this.ch_tik = this.ticker_api.filter(t =>
+          t.includes(this.ticker.toUpperCase())
+        );
+        for (let i = 0; i < 4; i++) {
+          if (this.ch_tik[i]) {
+            const element = this.ch_tik[i];
+            mass.push(element);
+          }
+        }
+        return mass;
+      }
+      this.ch_tik = ["BTC", "DOGE", "BCH", "CHD"];
+      return this.ch_tik;
     }
   }
 };
